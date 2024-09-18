@@ -11,23 +11,34 @@ public class Meteor : MonoBehaviour
     private GameObject smoke;
     [SerializeField]
     private CircleCollider2D circleCollider;
-
+    public bool isBig;
     [Header("Meteor Properties")]
-    [SerializeField]
     private int hitCount = 0;
-    protected static int health = 1;
-    protected static float moveSpeed = 2f;
+    [SerializeField]
+    private int health;
+    private float moveSpeed;
     private bool isDead = false;
 
     // Start is called before the first frame update
     void Start()
     {
+        if (!isBig)
+        {
+            moveSpeed = 2f;
+            health = 1;
+        }
+        else
+        {
+            moveSpeed = .5f;
+            health = 5;
+        }
         
     }
 
     // Update is called once per frame
     void Update()
     {
+        
         transform.Translate(Vector3.down * Time.deltaTime * moveSpeed);
 
         if (transform.position.y < -11f)
@@ -40,7 +51,12 @@ public class Meteor : MonoBehaviour
             spriteRenderer.enabled = false;
             circleCollider.enabled = false;
             smoke.SetActive(true);
-            Invoke("KillThis", 1);
+            if (isBig)
+            {
+                CameraBehavior cb = FindAnyObjectByType<CameraBehavior>();
+                cb.Shake();
+            }
+                Invoke("KillThis", 1);
         }
     }
 
@@ -51,8 +67,10 @@ public class Meteor : MonoBehaviour
             GameObject.Find("GameManager").GetComponent<GameManager>().gameOver = true;
             Destroy(whatIHit.gameObject);
             Destroy(this.gameObject);
-        } else if (whatIHit.tag == "Laser")
+        } 
+        else if (whatIHit.tag == "Laser")
         {
+            Debug.Log(health + name);
             Destroy(whatIHit.gameObject);
             hitCount++;
         }
