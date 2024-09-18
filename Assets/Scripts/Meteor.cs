@@ -4,7 +4,21 @@ using UnityEngine;
 
 public class Meteor : MonoBehaviour
 {
-    
+    [Header("Particle Stuff")]
+    [SerializeField]
+    private SpriteRenderer spriteRenderer;
+    [SerializeField]
+    private GameObject smoke;
+    [SerializeField]
+    private CircleCollider2D circleCollider;
+
+    [Header("Meteor Properties")]
+    [SerializeField]
+    private int hitCount = 0;
+    protected static int health = 1;
+    protected static float moveSpeed = 2f;
+    private bool isDead = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -14,11 +28,19 @@ public class Meteor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.Translate(Vector3.down * Time.deltaTime * 2f);
+        transform.Translate(Vector3.down * Time.deltaTime * moveSpeed);
 
         if (transform.position.y < -11f)
         {
             Destroy(this.gameObject);
+        }
+        if (hitCount >= health && !isDead)
+        {
+            isDead = true;
+            spriteRenderer.enabled = false;
+            circleCollider.enabled = false;
+            smoke.SetActive(true);
+            Invoke("KillThis", 1);
         }
     }
 
@@ -31,9 +53,13 @@ public class Meteor : MonoBehaviour
             Destroy(this.gameObject);
         } else if (whatIHit.tag == "Laser")
         {
-            GameObject.Find("GameManager").GetComponent<GameManager>().meteorCount++;
             Destroy(whatIHit.gameObject);
-            Destroy(this.gameObject);
+            hitCount++;
         }
+    }
+    private void KillThis()
+    {
+        GameObject.Find("GameManager").GetComponent<GameManager>().meteorCount+=1;
+        Destroy(this.gameObject);
     }
 }
